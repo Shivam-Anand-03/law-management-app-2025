@@ -1,0 +1,301 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String      @id @default(cuid())
+  firstName   String
+  lastName    String?
+  userName    String      @unique
+  email       String      @unique
+  userProfile String?
+  password    String
+  phoneNumber String      @unique
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  role        UserRole    @default(ADMIN)
+  chatToken   String?
+  Session     Session?
+  UserAddress Address?
+  TeamAdmin   TeamAdmin?
+  TeamMember  TeamMember?
+  TeamClient  TeamClient?
+  documents   Document[]
+  ToDoList    ToDoList[]
+}
+
+model Address {
+  id         String   @id @default(cuid())
+  zip        String
+  city       String
+  state      String
+  country    String
+  userId     String?  @unique
+  user       User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  opponentId String?
+}
+
+model Session {
+  id         String   @id @default(cuid())
+  sessionKey String   @unique
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("UserSessions")
+}
+
+model TeamAdmin {
+  id         String   @id @default(cuid())
+  userId     String?  @unique
+  user       User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role       UserRole @default(ADMIN)
+  isVerified Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  cases      Case[]
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  userId    String?  @unique
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      UserRole @default(MEMBER)
+  createdAt DateTime @default(now())
+
+  memberships TeamMembership[]
+}
+
+model Opponent {
+  id          String  @id @default(cuid())
+  firstName   String
+  lastName    String
+  jobTitle    String?
+  email       String?
+  phoneNumber String?
+  zip         String
+  city        String
+  state       String
+  country     String
+  Case        Case?
+}
+
+model TeamClient {
+  id        String   @id @default(cuid())
+  userId    String?  @unique
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      UserRole @default(CLIENT)
+  createdAt DateTime @default(now())
+
+  cases Case[]
+}
+
+model CaseTag {
+  id     String @id @default(cuid())
+  label  String
+  caseId String @unique
+  case   Case   @relation("CaseTags", fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@unique([label])
+}
+
+model TeamMembership {
+  id           String     @id @default(cuid())
+  teamMemberId String
+  teamMember   TeamMember @relation(fields: [teamMemberId], references: [id], onDelete: Cascade)
+
+  caseId String
+  case   Case   @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  joinedAt DateTime @default(now())
+
+  @@unique([teamMemberId, caseId])
+}
+
+model ToDoList {
+  id            String   @id @default(cuid())
+  task          String   @db.VarChar(300)
+  userId        String?
+  createdBy     User?    @relation(fields: [userId], references: [id])
+  isTaskChecked Boolean  @default(false)
+  taskForDate   DateTime @map("taskDate")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Case {
+  id                 String         @id @default(cuid())
+  title              String         @db.VarChar(300)
+  description        String?        @db.VarChar(300)
+  practiseArea       PracticeArea   @default(CRIMINAL)
+  arrivalDate        DateTime?      @default(now())
+  status             CaseStatus?    @default(OPEN)
+  matterPriority     matterPriority @default(HIGH)
+  internalRefNumber  String?
+  filedDate          DateTime?
+  closedDate         DateTime?
+  estimatedCloseDate DateTime?
+  stage              CaseStage      @default(RECONCILIATION_COMMITTEE)
+
+  clientId String
+  client   TeamClient @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  adminId String
+  admin   TeamAdmin @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  members TeamMembership[]
+
+  opponentId String?   @unique
+  Opponent   Opponent? @relation(fields: [opponentId], references: [id], onDelete: Cascade)
+
+  caseTag      CaseTag?       @relation("CaseTags")
+  caseDocument CaseDocument?  @relation("CaseDocs")
+  caseReminder CaseReminder[]
+  caseInvoice  CaseInvoice[]
+  caseBillings CaseBilling?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  caseNote     CaseNote?
+}
+
+model CaseNote {
+  id        String   @id @default(cuid())
+  note      String?  @db.VarChar(300)
+  caseId    String   @unique
+  case      Case?    @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model CaseDocument {
+  id          String   @id @default(cuid())
+  caseId      String   @unique
+  case        Case     @relation("CaseDocs", fields: [caseId], references: [id], onDelete: Cascade)
+  documentUrl String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model CaseReminder {
+  id           String   @id @default(cuid())
+  caseId       String
+  case         Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  reminderDate DateTime
+  description  String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model CaseInvoice {
+  id        String   @id @default(cuid())
+  caseId    String
+  case      Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  amount    Float
+  status    String
+  dueDate   DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CaseBilling {
+  id     String @id @default(cuid())
+  caseId String @unique
+  case   Case   @relation(fields: [caseId], references: [id])
+
+  amount        Float
+  currency      String        @default("INR")
+  rateType      CaseRateType  @default(FIXED)
+  paymentStatus PaymentStatus @default(PENDING)
+  paymentMethod PaymentMethod @default(BANK_TRANSFER)
+  paymentDate   DateTime?
+  billingNote   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Document {
+  id             String   @id @default(cuid())
+  title          String?
+  initialContent String?  @db.VarChar(300)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+}
+
+enum CaseRateType {
+  FIXED
+  HOURLY
+  RETAINER
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  BANK_TRANSFER
+  CREDIT_CARD
+  CASH
+  CHEQUE
+  ONLINE
+}
+
+enum UserRole {
+  ADMIN
+  MEMBER
+  CLIENT
+}
+
+enum CaseStatus {
+  OPEN
+  CLOSED
+  PENDING
+}
+
+enum matterPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum PracticeArea {
+  CRIMINAL
+  CIVIL
+  COMMERCIAL
+  ADMINISTRATIVE
+  LABOR
+  FAMILY
+  REAL_ESTATE
+  INTELLECTUAL_PROPERTY
+  ENVIRONMENTAL
+  TAXATION
+}
+
+enum OpponentType {
+  COMPANY
+  PERSON
+}
+
+enum CaseStage {
+  RECONCILIATION_COMMITTEE
+  FIRST_INSTANCE_COURT
+  APPEAL_COURT
+  CASSATION_HIGH_COURT
+  EXECUTION
+  UNDER_SETTLEMENT
+  SETTLED_CLOSED
+  DISPUTE
+}

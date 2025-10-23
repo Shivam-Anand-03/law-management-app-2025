@@ -1,0 +1,19 @@
+{
+  "name": "lawcrew",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev:web": "pnpm nx run @lawcrew/web:dev --verbose",
+    "dev:api": "pnpm nx run @lawcrew/api:dev",
+    "build:web": "pnpm --filter @lawcrew/web build",
+    "start:web": "pnpm --filter @lawcrew/web start",
+    "monorepo": "pnpm run build:web && concurrently -k -n web,api -c green,blue \"pnpm run start:web\" \"pnpm run dev:api\""
+  },
+  "keywords": [],
+  "author": "shivam",
+  "license": "ISC",
+  "devDependencies": {
+    "nx": "20.8.1",
+    "husky": "^8.0.0"
+  }
+}
