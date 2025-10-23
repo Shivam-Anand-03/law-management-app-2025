@@ -1,9 +1,10 @@
 "use client";
-
+import { config } from "dotenv";
 import { api as trpc } from "./client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
 import React, { useState } from "react";
+config();
 const TRPC_SERVER_API_URI = "http://localhost:5050/trpc";
 
 export const TrpcProvider = ({ children }: { children: React.ReactNode }) => {
@@ -13,7 +14,7 @@ export const TrpcProvider = ({ children }: { children: React.ReactNode }) => {
     trpc.createClient({
       links: [
         httpBatchLink({
-          url: `${TRPC_SERVER_API_URI}`,
+          url: `${process.env.TRPC_SERVER_API_URI}`,
           fetch(url, options) {
             return fetch(url, {
               ...(options as RequestInit),
