@@ -3,7 +3,7 @@ import {
   caseDetailsSchema,
   editCaseDetailsSchema,
 } from "../schema";
-import { protectedProcedure, router } from "@src/trpc/trpc";
+import { protectedProcedure, router } from "../trpc/trpc";
 import { ApiError } from "../utils/api-error";
 import { z } from "zod";
 

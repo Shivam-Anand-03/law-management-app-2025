@@ -30,7 +30,7 @@ import {
   Underline,
   Strikethrough,
 } from "lucide-react";
-import { AppRouterType } from "@lawcrew/trpc-server/routers/root";
+import { AppRouterType } from "@lawcrew/api";
 type GetDocsByIdOutput = AppRouterType["document"]["getDocsbyId"];
 
 interface DocsMenuBarProps {

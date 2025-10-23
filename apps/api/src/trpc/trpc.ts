@@ -1,7 +1,7 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import { createTRPCcontext } from "../context/index";
 import { ZodError } from "zod";
-import { AuthServices } from "@src/services/auth-services";
+import { AuthServices } from "../services/auth-services";
 
 export interface SessionUser {
   id: string;

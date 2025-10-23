@@ -12,11 +12,8 @@ import { CalendarIcon } from "lucide-react";
 import KanbanHeader from "./kanban-header";
 import { CaseStatus } from "./types";
 import { api } from "@lawcrew/trpc-client/src/client";
-import { AppRouterType } from "@lawcrew/trpc-server/routers/root";
 import { useAppToasts } from "@/hooks/use-app-toast";
 import NoData from "@/components/shared/no-data";
-
-type Task = AppRouterType["litigation"]["getCaseDetailsByAdminId"][number];
 
 const boards: CaseStatus[] = [
   CaseStatus.CLOSED,
@@ -25,7 +22,7 @@ const boards: CaseStatus[] = [
 ];
 
 type TaskState = {
-  [key in CaseStatus]: Task[];
+  [key in CaseStatus]: any;
 };
 
 const KanBanView = () => {
@@ -49,7 +46,7 @@ const KanBanView = () => {
         [CaseStatus.OPEN]: [],
       };
 
-      data.forEach((task) => {
+      data.forEach((task: any) => {
         if (task.status! in newTasks) {
           newTasks[task.status as CaseStatus].push(task);
         }
@@ -132,7 +129,7 @@ const KanBanView = () => {
                       {...provided.droppableProps}
                       className="mt-4 flex min-h-[12.5rem] flex-col"
                     >
-                      {tasks[board].map((task, index) => {
+                      {tasks[board].map((task: any, index: any) => {
                         const dueDate = task.estimatedCloseDate
                           ? new Date(
                               task.estimatedCloseDate,

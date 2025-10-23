@@ -1,9 +1,9 @@
 import { protectedProcedure, publicProcedure, router } from "../trpc/trpc";
 import { signupSchema, loginSchema, addTaskSchema } from "../schema";
 import { z } from "zod";
-import { ApiError } from "@src/utils/api-error";
-import { AuthServices } from "@src/services/auth-services";
-import { GlobalUtils } from "@src/global";
+import { ApiError } from "../utils/api-error";
+import { AuthServices } from "../services/auth-services";
+import { GlobalUtils } from "../global";
 
 export const authRoutes = router({
   signup: publicProcedure

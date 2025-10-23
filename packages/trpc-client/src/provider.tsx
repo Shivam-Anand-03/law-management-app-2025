@@ -4,7 +4,7 @@ import { api as trpc } from "./client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
 import React, { useState } from "react";
-import { appEnvConfigs } from "@lawcrew/api";
+const TRPC_SERVER_API_URI = "http://localhost:5050/trpc";
 
 export const TrpcProvider = ({ children }: { children: React.ReactNode }) => {
   const [queryClient] = useState(() => new QueryClient());
@@ -13,7 +13,7 @@ export const TrpcProvider = ({ children }: { children: React.ReactNode }) => {
     trpc.createClient({
       links: [
         httpBatchLink({
-          url: `${appEnvConfigs.TRPC_SERVER_API_URI}`,
+          url: `${TRPC_SERVER_API_URI}`,
           fetch(url, options) {
             return fetch(url, {
               ...(options as RequestInit),
